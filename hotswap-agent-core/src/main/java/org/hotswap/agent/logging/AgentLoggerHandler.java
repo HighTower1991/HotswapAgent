@@ -46,21 +46,23 @@ public class AgentLoggerHandler {
             }
         }
 
-        StringBuffer stringBuffer = new StringBuffer();
+        StringBuilder mes = new StringBuilder();
 //        stringBuffer.append(formatCurrentTime());
 //        stringBuffer.append(" ");
-        stringBuffer.append(level);
-        stringBuffer.append(" (");
-        stringBuffer.append(clazz.getName());
-        stringBuffer.append(") - ");
-        stringBuffer.append(messageWithArgs);
+        mes.append(level);
+//        stringBuffer.append(" ");
+//        stringBuffer.append(Thread.currentThread());
+        mes.append(" (");
+        mes.append(clazz.getName());
+        mes.append(") - ");
+        mes.append(messageWithArgs);
 
         if (throwable != null) {
-            stringBuffer.append("\n");
-            stringBuffer.append(formatErrorTrace(throwable));
+            mes.append("\n");
+            mes.append(formatErrorTrace(throwable));
         }
 
-        printMessage(stringBuffer.toString());
+        printMessage(mes.toString());
     }
 
     private String formatErrorTrace(Throwable throwable) {

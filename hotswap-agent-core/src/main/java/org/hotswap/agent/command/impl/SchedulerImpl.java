@@ -7,6 +7,7 @@ import org.hotswap.agent.command.Scheduler;
 import org.hotswap.agent.logging.AgentLogger;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default command scheduler implementation.
@@ -18,7 +19,7 @@ public class SchedulerImpl implements Scheduler {
 
     int DEFAULT_SCHEDULING_TIMEOUT = 100;
 
-    final Map<Command, DuplicateScheduleConfig> scheduledCommands = Collections.synchronizedMap(new HashMap<Command, DuplicateScheduleConfig>());
+    final Map<Command, DuplicateScheduleConfig> scheduledCommands = new ConcurrentHashMap<>();
     final Set<Command> runningCommands = Collections.synchronizedSet(new HashSet<Command>());
 
     Thread runner;
@@ -116,22 +117,29 @@ public class SchedulerImpl implements Scheduler {
             @Override
             public void run() {
                 for (; ; ) {
-                    if (stopped || !processCommands())
-                        break;
-
-                    // wait for 100 ms
                     try {
-                        sleep(100);
-                    } catch (InterruptedException e) {
-                        break;
+                        if (stopped || !processCommands()) {
+                            break;
+                        }
+
+                        // wait for 100 ms
+                        try {
+                            sleep(100);
+                        } catch (InterruptedException e) {
+                            LOGGER.warning("Command executor stoped", e.getMessage(), e);
+                            break;
+                        }
+                    } catch (Throwable th) {
+                        LOGGER.error("Exception in Command Executor", th);
                     }
                 }
-
+                LOGGER.warning("Command executor stoped");
             }
         };
-
+        runner.setName("Hotswap Scheduler");
         runner.setDaemon(true);
         runner.start();
+        LOGGER.debug("Command executor started");
     }
 
     @Override

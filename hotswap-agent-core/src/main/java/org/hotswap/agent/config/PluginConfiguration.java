@@ -93,9 +93,9 @@ public class PluginConfiguration {
 
         if (configurationURL == null && parent != null) {
             configurationURL = parent.configurationURL;
-            LOGGER.debug("Classloader does not contain 'hotswap-agent.properties', using parent file '{}'", parent.configurationURL);
+            LOGGER.info("Classloader does not contain 'hotswap-agent.properties', using parent file '{}'", parent.configurationURL);
         } else {
-            LOGGER.debug("Classloader contains 'hotswap-agent.properties' at location '{}'", configurationURL);
+            LOGGER.info("Classloader contains 'hotswap-agent.properties' at location '{}'", configurationURL);
             containsPropertyFileDirectly = true;
         }
 
@@ -138,7 +138,7 @@ public class PluginConfiguration {
             } else if (classLoader instanceof HotswapAgentClassLoaderExt) {
                 ((HotswapAgentClassLoaderExt) classLoader).setExtraClassPath(extraClassPath);
             } else {
-                LOGGER.debug("Unable to set extraClasspath to {} on classLoader {}. " +
+                LOGGER.info("Unable to set extraClasspath to {} on classLoader {}. " +
                         "Only URLClassLoader is supported.\n" +
                         "*** extraClasspath configuration property will not be handled on JVM level ***", Arrays.toString(extraClassPath), classLoader);
             }

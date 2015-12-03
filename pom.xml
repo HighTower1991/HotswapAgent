@@ -31,6 +31,7 @@
         <module>plugin/hotswap-agent-weld-plugin</module>
         <module>plugin/hotswap-agent-jbossmodules-plugin</module>
         <module>hotswap-agent</module>
+        <module>plugin/hotswap-agent-glassfish-plugin</module>
     </modules>
 
     <licenses>
