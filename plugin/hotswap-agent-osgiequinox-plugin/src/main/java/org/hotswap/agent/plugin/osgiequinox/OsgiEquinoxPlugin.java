@@ -48,9 +48,6 @@ public class OsgiEquinoxPlugin {
     private static AgentLogger LOGGER = AgentLogger.getLogger(OsgiEquinoxPlugin.class);
 
     @Init
-    ClassLoader appClassLoader;
-
-    @Init
     Scheduler scheduler;
 
     @Init
@@ -191,8 +188,7 @@ public class OsgiEquinoxPlugin {
 
                 Class clazz  = classLoader.loadClass(ctClass.getName());
 
-                if (putToReloadMap)
-                {
+                if (putToReloadMap) {
                     synchronized (reloadMap) {
                         reloadMap.put(clazz, bytecode);
                     }

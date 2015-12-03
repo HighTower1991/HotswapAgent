@@ -13,10 +13,16 @@ import org.hotswap.agent.command.MergeableCommand;
 import org.hotswap.agent.logging.AgentLogger;
 import org.hotswap.agent.watch.WatchFileEvent;
 
-public class ClassPathBeanRefreshCommand extends MergeableCommand {
-    private static AgentLogger LOGGER = AgentLogger.getLogger(ClassPathBeanRefreshCommand.class);
+/**
+ * BeanRefreshCommand. When a bean class is redefined object of ClassPathBeanRefreshCommand is created and after
+ * timeout executed. It calls bean reload logic in BeanDepoymentArchiveAagent internally
+ *
+ * @author Vladimir Dvorak
+ */
+public class BeanRefreshCommand extends MergeableCommand {
+    private static AgentLogger LOGGER = AgentLogger.getLogger(BeanRefreshCommand.class);
 
-    ClassLoader appClassLoader;
+    ClassLoader classLoader;
 
     String archivePath;
 
@@ -25,26 +31,24 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
     // either event or classDefinition is set by constructor (watcher or transformer)
     WatchFileEvent event;
 
-    public ClassPathBeanRefreshCommand(ClassLoader appClassLoader, String archivePath, String className) {
-        this.appClassLoader = appClassLoader;
+    public BeanRefreshCommand(ClassLoader classLoader, String archivePath, String className) {
+        this.classLoader = classLoader;
         this.archivePath = archivePath;
         this.className = className;
     }
 
-    public ClassPathBeanRefreshCommand(ClassLoader appClassLoader, String archivePath, WatchFileEvent event) {
-        this.appClassLoader = appClassLoader;
+    public BeanRefreshCommand(ClassLoader classLoader, String archivePath, WatchFileEvent event) {
+        this.classLoader = classLoader;
         this.archivePath = archivePath;
         this.event = event;
 
         // strip from URI prefix up to basePackage and .class suffix.
         String classFullPath = Paths.get(event.getURI()).toString();
-        int indx = classFullPath.indexOf(archivePath);
-        if (indx == 0)
-        {
+        int index = classFullPath.indexOf(archivePath);
+        if (index == 0) {
             String classPath = classFullPath.substring(archivePath.length());
             classPath = classPath.substring(0, classPath.indexOf(".class"));
-            if (classPath.startsWith(File.separator))
-            {
+            if (classPath.startsWith(File.separator)) {
                 classPath = classPath.substring(1);
             }
             this.className = classPath.replace(File.separator, ".");
@@ -60,20 +64,18 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
         }
 
         try {
-            LOGGER.debug("Executing ClassPathBeanDefinitionScannerAgent.refreshBean('{}')", className);
-
-            Class<?> clazz = appClassLoader.loadClass(BeanDeploymentArchiveAgent.class.getName());
-            Method method  = clazz.getDeclaredMethod("refreshClass", new Class[] {String.class, String.class});
-            method.invoke(null, archivePath, className);
-
+            LOGGER.debug("Executing BeanDeploymentArchiveAgent.refreshClass('{}')", className);
+            Class<?> bdaAgentClazz = Class.forName(BeanDeploymentArchiveAgent.class.getName(), true, classLoader);
+            Method bdaMethod  = bdaAgentClazz.getDeclaredMethod("refreshClass", new Class[] {ClassLoader.class, String.class, String.class});
+            bdaMethod.invoke(null, classLoader, archivePath, className);
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException("Plugin error, method not found", e);
         } catch (InvocationTargetException e) {
-            LOGGER.error("Error refreshing class {} in classLoader {}", e, className, appClassLoader);
+            LOGGER.error("Error refreshing class {} in classLoader {}", e, className, classLoader);
         } catch (IllegalAccessException e) {
             throw new IllegalStateException("Plugin error, illegal access", e);
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException("Plugin error, Spring class not found in application classloader", e);
+            throw new IllegalStateException("Plugin error, CDI class not found in classloader", e);
         }
 
     }
@@ -84,15 +86,15 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
      */
     private boolean isDeleteEvent() {
         // for all merged commands including this command
-        List<ClassPathBeanRefreshCommand> mergedCommands = new ArrayList<ClassPathBeanRefreshCommand>();
+        List<BeanRefreshCommand> mergedCommands = new ArrayList<BeanRefreshCommand>();
         for (Command command : getMergedCommands()) {
-            mergedCommands.add((ClassPathBeanRefreshCommand) command);
+            mergedCommands.add((BeanRefreshCommand) command);
         }
         mergedCommands.add(this);
 
         boolean createFound = false;
         boolean deleteFound = false;
-        for (ClassPathBeanRefreshCommand command : mergedCommands) {
+        for (BeanRefreshCommand command : mergedCommands) {
             if (command.event != null) {
                 if (command.event.getEventType().equals(FileEvent.DELETE))
                     deleteFound = true;
@@ -110,9 +112,9 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ClassPathBeanRefreshCommand that = (ClassPathBeanRefreshCommand) o;
+        BeanRefreshCommand that = (BeanRefreshCommand) o;
 
-        if (!appClassLoader.equals(that.appClassLoader)) return false;
+        if (!classLoader.equals(that.classLoader)) return false;
         if (!className.equals(that.className)) return false;
 
         return true;
@@ -120,7 +122,7 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
 
     @Override
     public int hashCode() {
-        int result = appClassLoader.hashCode();
+        int result = classLoader.hashCode();
         result = 31 * result + className.hashCode();
         return result;
     }
@@ -128,8 +130,8 @@ public class ClassPathBeanRefreshCommand extends MergeableCommand {
     @Override
     public String toString() {
         return "ClassPathBeanRefreshCommand{" +
-                "appClassLoader=" + appClassLoader +
-                ", basePackage='" + archivePath + '\'' +
+                "classLoader=" + classLoader +
+                ", archivePath='" + archivePath + '\'' +
                 ", className='" + className + '\'' +
                 '}';
     }

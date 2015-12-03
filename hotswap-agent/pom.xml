@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.hotswap.agent</groupId>
         <artifactId>hotswap-agent-parent</artifactId>
-        <version>0.2.1-SNAPSHOT</version>
+        <version>0.3.0-SNAPSHOT</version>
         <relativePath>../hotswap-agent-parent/pom.xml</relativePath>
     </parent>
 
@@ -39,7 +39,7 @@
             <artifactId>hotswap-agent-jersey2-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.hotswap.agent</groupId>
             <artifactId>hotswap-agent-jetty-plugin</artifactId>
@@ -96,7 +96,19 @@
 
         <dependency>
             <groupId>org.hotswap.agent</groupId>
+            <artifactId>hotswap-agent-webobjects-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hotswap.agent</groupId>
             <artifactId>hotswap-agent-weld-plugin</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hotswap.agent</groupId>
+            <artifactId>hotswap-agent-jbossmodules-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -148,6 +160,7 @@
                                     <Implementation-Title>${project.build.finalName}</Implementation-Title>
                                     <Implementation-Version>${project.version}</Implementation-Version>
                                     <Premain-Class>org.hotswap.agent.HotswapAgent</Premain-Class>
+                                    <!-- <Boot-Class-Path>hotswap-agent.jar</Boot-Class-Path>  -->
                                     <Can-Redefine-Classes>true</Can-Redefine-Classes>
                                     <Can-Retransform-Classes>true</Can-Retransform-Classes>
                                 </manifestEntries>
