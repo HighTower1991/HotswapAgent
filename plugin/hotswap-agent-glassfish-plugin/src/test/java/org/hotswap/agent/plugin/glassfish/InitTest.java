@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.logging.Logger;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
@@ -28,6 +29,8 @@ import org.junit.runner.RunWith;
 @RunWith(Arquillian.class)
 public class InitTest {
 
+    private static final Logger LOG = Logger.getLogger(InitTest.class.getName());
+
     @Deployment
     public static WebArchive createTestArchive() {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "Test.war");
@@ -43,14 +46,14 @@ public class InitTest {
     @RunAsClient
     @Test
     public void testHello() throws Exception {
-        System.out.println(url);
+        LOG.info(""+url);
         hotswap(ForHotswap.class, "target/hotswap-classes/");
-        System.out.println("Swap");
-        Thread.sleep(500);
+        LOG.info("Swap");
+        Thread.sleep(1000);
         assertEquals("Hello Hotswap", readResponce());
         hotswap(ForHotswap.class, "target/hotswap-classes-twice/");
-        System.out.println("Swap twice");
-        Thread.sleep(500);
+        LOG.info("Swap twice");
+        Thread.sleep(1000);
         assertEquals("Hello Hotswap twice", readResponce());
 
     }
@@ -69,7 +72,7 @@ public class InitTest {
         BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
         String inputLine = in.readLine();
         in.close();
-        System.out.println(inputLine);
+        LOG.info(inputLine);
         return inputLine;
     }
 
