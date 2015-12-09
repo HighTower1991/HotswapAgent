@@ -9,6 +9,45 @@
     </parent>
     <artifactId>hotswap-agent-glassfish-plugin</artifactId>
 
+    <profiles>
+        <profile>
+            <id>integration</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.main.extras</groupId>
+                    <artifactId>glassfish-managed-all</artifactId>
+                    <version>4.1.1</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.arquillian.container</groupId>
+                    <artifactId>arquillian-glassfish-managed-3.1</artifactId>
+                    <version>1.0.0.CR4</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.glassfish.main.extras</groupId>
+                    <artifactId>glassfish-embedded-all</artifactId>
+                    <version>4.1.1</version>
+                    <scope>provided</scope>
+                </dependency>
+                <dependency>
+                    <groupId>org.jboss.arquillian.container</groupId>
+                    <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
+                    <version>1.0.0.CR4</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
       
     <build>
         <plugins>
@@ -62,9 +101,13 @@
                             <tasks>
                                 <property name="build.compiler" value="extJavac"/>
 
-                                <!-- compile src/main/java-extra into target/extra -->
-                                <mkdir dir="target/hotswap"/>
-                                <javac srcdir="src/test/resources/hotswap" destdir="target/hotswap">
+                                <mkdir dir="target/hotswap-classes"/>
+                                <javac srcdir="src/test/resources/hotswap" destdir="target/hotswap-classes">
+                                    <classpath refid="maven.compile.classpath"/>
+                                </javac>
+                                
+                                <mkdir dir="target/hotswap-classes-twice"/>
+                                <javac srcdir="src/test/resources/hotswap-twice" destdir="target/hotswap-classes-twice">
                                     <classpath refid="maven.compile.classpath"/>
                                 </javac>
 
@@ -100,9 +143,6 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.hamcrest</groupId>
@@ -127,38 +167,7 @@
             <artifactId>slf4j-log4j12</artifactId>
             <version>1.7.12</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.main.extras</groupId>
-            <artifactId>glassfish-embedded-all</artifactId>
-            <version>4.1.1</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--        <dependency>
-            <groupId>fish.payara.extras</groupId>
-            <artifactId>payara-embedded-all</artifactId>
-            <version>4.1.152.1</version>
-            <type>jar</type>
-            <scope>provided</scope>
-        </dependency>-->
-        <!--        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-            <version>1.0.0.CR4</version>
-            <scope>test</scope>
-        </dependency>-->
-        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-glassfish-managed-3.1</artifactId>
-            <version>1.0.0.CR4</version>
-            <scope>test</scope>
-        </dependency>
-<!--        <dependency>
-            <groupId>org.jboss.arquillian.container</groupId>
-            <artifactId>arquillian-glassfish-embedded-3.1</artifactId>
-            <version>1.0.0.CR4</version>
-            <scope>test</scope>
-        </dependency>-->
+        </dependency>        
         <dependency>
             <groupId>org.jboss.arquillian.junit</groupId>
             <artifactId>arquillian-junit-container</artifactId>

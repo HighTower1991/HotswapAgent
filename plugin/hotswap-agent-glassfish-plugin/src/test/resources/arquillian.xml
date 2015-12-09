@@ -4,7 +4,7 @@
         <property name="deploymentExportPath">target/arquillian</property>
     </engine>
  
-    <container qualifier="glassfish" default="true">
+    <container qualifier="managed-glassfish">
         <configuration>
             <property name="glassFishHome">target/glassfish4</property>
             <property name="adminHost">localhost</property>

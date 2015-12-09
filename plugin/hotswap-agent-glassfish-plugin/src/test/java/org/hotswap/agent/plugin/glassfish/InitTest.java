@@ -26,8 +26,8 @@ import org.junit.runner.RunWith;
  * @author lysenko
  */
 @RunWith(Arquillian.class)
-public class InitIT {
-    
+public class InitTest {
+
     @Deployment
     public static WebArchive createTestArchive() {
         WebArchive archive = ShrinkWrap.create(WebArchive.class, "Test.war");
@@ -37,34 +37,40 @@ public class InitIT {
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
 
     }
-    
+
     @ArquillianResource public URL url;
 
     @RunAsClient
     @Test
     public void testHello() throws Exception {
         System.out.println(url);
-        hotswap(ForHotswap.class);
+        hotswap(ForHotswap.class, "target/hotswap-classes/");
         System.out.println("Swap");
-        Thread.sleep(20000);
+        Thread.sleep(500);
         assertEquals("Hello Hotswap", readResponce());
+        hotswap(ForHotswap.class, "target/hotswap-classes-twice/");
+        System.out.println("Swap twice");
+        Thread.sleep(500);
+        assertEquals("Hello Hotswap twice", readResponce());
+
     }
 
-    public static void hotswap(Class toHotswap) throws Exception {
+    public static void hotswap(Class toHotswap, String from) throws Exception {
         String swapedFile = toHotswap.getName().replace(".", "/") + ".class";
-        Path source = Paths.get("target/hotswap/" + swapedFile);
-        Path target = Paths.get("target/glassfish4/glassfish/domains/domain1/applications/Test/WEB-INF/classes/" + swapedFile);
+        Path source = Paths.get(from + swapedFile);
+//        Path target = Paths.get("target/glassfish4/glassfish/domains/domain1/applications/Test/WEB-INF/classes/" + swapedFile);
+        Path target = Paths.get("target/classes/" + swapedFile);
         Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
     }
 
     String readResponce() throws IOException, MalformedURLException {
-        URL oracle = new URL("http://"+url.getHost()+":"+url.getPort()+"/Test/activator");
+        URL oracle = new URL("http://" + url.getHost() + ":" + url.getPort() + "/Test/activator");
         URLConnection yc = oracle.openConnection();
         BufferedReader in = new BufferedReader(new InputStreamReader(yc.getInputStream()));
         String inputLine = in.readLine();
         in.close();
+        System.out.println(inputLine);
         return inputLine;
     }
-
 
 }
