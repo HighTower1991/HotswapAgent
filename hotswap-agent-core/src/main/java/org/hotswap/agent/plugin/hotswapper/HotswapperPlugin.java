@@ -92,12 +92,12 @@ public class HotswapperPlugin {
                 @Override
                 public void executeCommand() {
                     pluginManager.hotswap(reloadMap);
-                }
+        }
 
                 @Override
                 public String toString() {
                     return "pluginManager.hotswap(" + Arrays.toString(reloadMap.keySet().toArray()) + ")";
-                }
+    }
             };
         }
     }

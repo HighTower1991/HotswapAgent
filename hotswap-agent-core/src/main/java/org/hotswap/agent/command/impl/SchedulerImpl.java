@@ -8,6 +8,8 @@ import org.hotswap.agent.logging.AgentLogger;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Default command scheduler implementation.
@@ -21,6 +23,7 @@ public class SchedulerImpl implements Scheduler {
 
     final Map<Command, DuplicateScheduleConfig> scheduledCommands = new ConcurrentHashMap<>();
     final Set<Command> runningCommands = Collections.synchronizedSet(new HashSet<Command>());
+    ExecutorService executor  = Executors.newSingleThreadExecutor();
 
     Thread runner;
     boolean stopped;
@@ -101,14 +104,14 @@ public class SchedulerImpl implements Scheduler {
             LOGGER.trace("Executing {}", command); // too much output for debug
         else
             LOGGER.debug("Executing {}", command);
-
+//todo make good synchronisation. Double redefine crash jvm
         runningCommands.add(command);
-        new CommandExecutor(command) {
+        executor.submit(new CommandExecutor(command) {
             @Override
             public void finished() {
                 runningCommands.remove(command);
             }
-        }.start();
+        });
     }
 
     @Override

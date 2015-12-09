@@ -47,10 +47,12 @@ public class InitTest {
     @Test
     public void testHello() throws Exception {
         LOG.info(""+url);
+        assertEquals("Hello", readResponce());
         hotswap(ForHotswap.class, "target/hotswap-classes/");
         LOG.info("Swap");
         Thread.sleep(1000);
         assertEquals("Hello Hotswap", readResponce());
+        System.gc(); //release file handler and lock
         hotswap(ForHotswap.class, "target/hotswap-classes-twice/");
         LOG.info("Swap twice");
         Thread.sleep(1000);
